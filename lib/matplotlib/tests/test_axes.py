@@ -3958,14 +3958,17 @@ def test_vlines_default():
     y = [2, -6, 3, 8, 2]
     fig, ax = plt.subplots()
     lines = ax.vlines(x, 0, y, linewidth=5)
-    assert mpl.colors.same_color(lines.get_color(), mpl.colors.to_rgba_array(mpl.rcParams['lines.color']))
+    c = mpl.rcParams['lines.color']
+    assert mpl.colors.same_color(lines.get_color(),
+                                 mpl.colors.to_rgba_array(c))
 
     # check assigned color
     x = [2, 3, 4, 5, 7]
     y = [2, -6, 3, 8, 2]
     fig, ax = plt.subplots()
     lines = ax.vlines(x, 0, y, colors='k', linewidth=5)
-    assert mpl.colors.same_color(lines.get_color(), mpl.colors.to_rgba_array('k'))
+    assert mpl.colors.same_color(lines.get_color(),
+                                 mpl.colors.to_rgba_array('k'))
 
 @image_comparison(['hlines_basic', 'hlines_with_nan', 'hlines_masked'],
                   extensions=['png'])
@@ -4006,20 +4009,25 @@ def test_hlines():
     ax5.hlines(y5, xmin5, xmax5, colors='k', linewidth=2)
     ax5.set_ylim(0, 15)
 
+
 def test_hlines_default():
     # check the default color
     x = [2, 3, 4, 5, 7]
     y = [2, -6, 3, 8, 2]
     fig, ax = plt.subplots()
     lines = ax.hlines(x, 0, y, linewidth=5)
-    assert mpl.colors.same_color(lines.get_color(), mpl.colors.to_rgba_array(mpl.rcParams['lines.color']))
+    c = mpl.rcParams['lines.color']
+    assert mpl.colors.same_color(lines.get_color(),
+                                 mpl.colors.to_rgba_array(c))
 
     # check assigned color
     x = [2, 3, 4, 5, 7]
     y = [2, -6, 3, 8, 2]
     fig, ax = plt.subplots()
     lines = ax.hlines(x, 0, y, colors='k', linewidth=5)
-    assert mpl.colors.same_color(lines.get_color(), mpl.colors.to_rgba_array('k'))
+    assert mpl.colors.same_color(lines.get_color(),
+                                 mpl.colors.to_rgba_array('k'))
+
 
 @image_comparison(['step_linestyle', 'step_linestyle'], remove_text=True)
 def test_step_linestyle():
