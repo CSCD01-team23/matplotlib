@@ -101,3 +101,13 @@ deprecation warning.
 Previously setting the *ecolor* would turn off automatic color cycling for the plot, leading to the 
 the lines and markers defaulting to whatever the first color in the color cycle was in the case of 
 multiple plot calls. 
+
+`pyplot.hlines` and `pyplot.vlines` now has None as the default parameter for `colors`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Previously, when no value was assigned to the parameter ``colors`` the line color was set to the default color ``k`` instead of ``lines.color`` from ``rcParams`` . Now, the default value is set to None. `pyplot.hlines` and `pyplot.vlines` call ``LineCollection`` where the value of colors is set to ``rcParams[lines.color]`` if ``colors`` is ``None``.
+
+`_axes.hlines` and `_axes.vlines` now has None as the default parameter for `colors`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Previously, when no value was assigned to the parameter ``colors`` the line color was set to the default color ``k`` instead of ``lines.color`` from ``rcParams`` . Now, the default value is set to None. `_axes.hlines` and `_axes.vlines` call ``LineCollection`` where the value of colors is set to ``rcParams[lines.color]`` if ``colors`` is ``None``.

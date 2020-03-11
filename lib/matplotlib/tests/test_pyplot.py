@@ -58,3 +58,40 @@ def test_nrows_error():
         plt.subplot(nrows=1)
     with pytest.raises(TypeError):
         plt.subplot(ncols=1)
+
+
+def test_lines_dark_background_default():
+    plt.style.use('dark_background')
+    plt.figure()
+    with mpl.rc_context({'lines.color':'white'}):
+        hline = plt.hlines(0.5, 0, 1)
+        vline = plt.vlines(0.5, 0, 1)
+    assert mpl.colors.same_color(hline.get_color(), mpl.colors.to_rgba_array(mpl.rcParams['lines.color']))
+    assert mpl.colors.same_color(vline.get_color(), mpl.colors.to_rgba_array(mpl.rcParams['lines.color']))
+
+
+def test_lines_dark_background():
+    plt.style.use('dark_background')
+    plt.figure()
+    with mpl.rc_context({'lines.color':'white'}):
+        hline = plt.hlines(0.5, 0, 1, colors='red')
+        vline = plt.vlines(0.5, 0, 1, colors='green')
+    assert mpl.colors.same_color(hline.get_color(), mpl.colors.to_rgba_array('red'))
+    assert mpl.colors.same_color(vline.get_color(), mpl.colors.to_rgba_array('green'))
+
+
+def test_lines_white_background_default():
+    plt.figure()
+    hline = plt.hlines(0.5, 0, 1)
+    vline = plt.vlines(0.5, 0, 1)
+    assert mpl.colors.same_color(hline.get_color(), mpl.colors.to_rgba_array(mpl.rcParams['lines.color']))
+    assert mpl.colors.same_color(vline.get_color(), mpl.colors.to_rgba_array(mpl.rcParams['lines.color']))
+
+
+def test_lines_white_background():
+    plt.figure()
+    with mpl.rc_context({'lines.color':'white'}):
+        hline = plt.hlines(0.5, 0, 1, colors='k')
+        vline = plt.vlines(0.5, 0, 1, colors='red')
+    assert mpl.colors.same_color(hline.get_color(), mpl.colors.to_rgba_array('k'))
+    assert mpl.colors.same_color(vline.get_color(), mpl.colors.to_rgba_array('red'))
