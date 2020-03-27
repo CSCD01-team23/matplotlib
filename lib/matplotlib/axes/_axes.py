@@ -1161,7 +1161,6 @@ class Axes(_AxesBase):
         masked_verts[:, 0, 1] = y
         masked_verts[:, 1, 0] = xmax
         masked_verts[:, 1, 1] = y
-
         lines = mcoll.LineCollection(masked_verts, colors=colors,
                                      linestyles=linestyles, label=label)
         self.add_collection(lines, autolim=False)
@@ -4310,6 +4309,44 @@ class Axes(_AxesBase):
             colors = None  # use cmap, norm after collection is created
         return c, colors, edgecolors
 
+    def _return_path(self, edgecolors, linewidths, marker):
+        if marker is None:
+            marker = [rcParams['scatter.marker']]
+        elif isinstance(marker, np.ndarray):
+            try:
+                paths, edgecolors, linewidths = \
+                    self._create_path(edgecolors, linewidths, marker)
+            except ValueError:
+                pass
+            else:
+                return paths, edgecolors, linewidths
+        if not isinstance(marker, list):
+            marker = [marker]
+        paths, edgecolors, linewidths = \
+            self._create_path(edgecolors, linewidths, marker)
+
+        return paths, edgecolors, linewidths
+
+
+    @staticmethod
+    def _create_path(edgecolors, linewidths, marker):
+        single_marker = (len(marker) == 1)
+        paths = []
+        for m in marker:
+            if isinstance(m, mmarkers.MarkerStyle):
+                marker_obj = m
+            else:
+                marker_obj = mmarkers.MarkerStyle(m)
+            path = marker_obj.get_path().transformed(
+                marker_obj.get_transform())
+            if single_marker:
+                if not marker_obj.is_filled():
+                    edgecolors = 'face'
+                    linewidths = rcParams['lines.linewidth']
+            paths.append(path)
+
+        return paths, edgecolors, linewidths
+
     @_preprocess_data(replace_names=["x", "y", "s", "linewidths",
                                      "edgecolors", "c", "facecolor",
                                      "facecolors", "color"],
@@ -4461,25 +4498,13 @@ default: :rc:`scatter.edgecolors`
 
         scales = s   # Renamed for readability below.
 
-        # load default marker from rcParams
-        if marker is None:
-            marker = rcParams['scatter.marker']
-
-        if isinstance(marker, mmarkers.MarkerStyle):
-            marker_obj = marker
-        else:
-            marker_obj = mmarkers.MarkerStyle(marker)
-
-        path = marker_obj.get_path().transformed(
-            marker_obj.get_transform())
-        if not marker_obj.is_filled():
-            edgecolors = 'face'
-            linewidths = rcParams['lines.linewidth']
+        paths, edgecolors, linewidths = \
+             self._return_path(edgecolors, linewidths, marker)
 
         offsets = np.ma.column_stack([x, y])
 
         collection = mcoll.PathCollection(
-                (path,), scales,
+                paths, scales,
                 facecolors=colors,
                 edgecolors=edgecolors,
                 linewidths=linewidths,
@@ -5275,7 +5300,6 @@ default: :rc:`scatter.edgecolors`
 
             if ind_dir == "y":
                 pts = pts[:, ::-1]
-
             polys.append(pts)
 
         collection = mcoll.PolyCollection(polys, **kwargs)
