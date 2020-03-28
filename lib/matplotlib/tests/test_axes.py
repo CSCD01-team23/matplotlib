@@ -2110,6 +2110,50 @@ class TestScatter:
         ax = fig_ref.subplots()
         ax.scatter(x.reshape(5, 2), x, c=x.reshape(2, 5))
 
+    @image_comparison(baseline_images=['marker_list'], remove_text=True,
+                      extensions=['png'])
+    def test_marker_list(self):
+        # to minimize the number of image comparison tests
+        # we test several aspects of the marker list functionality
+        # in one test
+        fig, (ax0, ax1, ax2) = plt.subplots(ncols=3)
+        
+        # test list of length x.size
+        ax0.scatter([1, 2, 3], [4, 5, 6], marker=['o', '*', 's'])
+        
+        # test list of shorter length
+        ax1.scatter([1, 2, 3], [4, 5, 6], marker=['*', 's'])
+        
+        # test list with linewidths
+        ax2.scatter([1,2,3], [4,5,6], c='red',edgecolors='green',
+                    marker=['s', 'o'], linewidths=[10,5],s=500)
+
+    @image_comparison(baseline_images=['marker_list_of_one'], remove_text=True,
+                      extensions=['png'])
+    def test_marker_list_of_one(self):
+        fig, (ax0, ax1) = plt.subplots(ncols=2)
+        ax0.scatter([3, 4, 2, 6], [2, 5, 2, 3],
+                        c=[(1, 0, 0), 'y', 'b', 'lime'],
+                        s=[60, 50, 40, 30],
+                        edgecolors=['k', 'r', 'g', 'b'],
+                        marker=['s'])
+        ax1.scatter([3, 4, 2, 6], [2, 5, 2, 3],
+                    c=[(1, 0, 0), 'y', 'b', 'lime'],
+                    s=[60, 50, 40, 30],
+                    edgecolors=['k', 'r', 'g', 'b'],
+                    marker=[mmarkers.MarkerStyle('o', fillstyle='top')])
+
+    @image_comparison(baseline_images=['marker_nparray_list'], remove_text=True,
+                      extensions=['png'])
+    def test_marker_nparray_list(self):
+        np.random.seed(19680801)
+        N = 40
+        x, y, c = np.random.rand(3, N)
+        s = np.random.randint(10, 220, size=N)
+        m = np.repeat(["o", "s", "D", "*"], N/4)        
+        fig, ax = plt.subplots()
+        ax.scatter(x, y, c=c, marker=m,s=s)
+
     # Parameters for *test_scatter_c*. NB: assuming that the
     # scatter plot will have 4 elements. The tuple scheme is:
     # (*c* parameter case, exception regexp key or None if no exception)
