@@ -4316,7 +4316,7 @@ class Axes(_AxesBase):
             try:
                 paths, edgecolors, linewidths = \
                     self._create_path(edgecolors, linewidths, marker)
-            except ValueError:
+            except (ValueError, TypeError):
                 pass
             else:
                 return paths, edgecolors, linewidths
