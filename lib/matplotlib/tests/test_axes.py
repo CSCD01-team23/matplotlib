@@ -2154,6 +2154,12 @@ class TestScatter:
         fig, ax = plt.subplots()
         ax.scatter(x, y, c=c, marker=m,s=s)
 
+    def test_marker_empty_list(self):
+        fig, ax = plt.subplots()
+        with pytest.raises(ValueError) as e:
+            ax.scatter([1, 2, 3], [4, 5, 6], marker=[])
+        assert str(e.value) == 'marker cannot be an empty list.'
+
     # Parameters for *test_scatter_c*. NB: assuming that the
     # scatter plot will have 4 elements. The tuple scheme is:
     # (*c* parameter case, exception regexp key or None if no exception)
