@@ -4436,6 +4436,10 @@ default: :rc:`scatter.edgecolors`
           size matches the size of *x* and *y*.
 
         """
+        # check marker is not empty list
+        if isinstance(marker, list) and (len(marker) == 0):
+            raise ValueError("marker cannot be an empty list")        
+        
         # Process **kwargs to handle aliases, conflicts with explicit kwargs:
 
         self._process_unit_info(xdata=x, ydata=y, kwargs=kwargs)

@@ -2105,7 +2105,7 @@ class TestScatter:
         # to minimize the number of image comparison tests
         # we test several aspects of the marker list functionality
         # in one test
-        fig, (ax0, ax1, ax2) = plt.subplots(ncols=3)
+        fig, ((ax0, ax1), (ax2, ax3)) = plt.subplots(nrows=2, ncols=2)
         
         # test list of length x.size
         ax0.scatter([1, 2, 3], [4, 5, 6], marker=['o', '*', 's'])
@@ -2116,6 +2116,12 @@ class TestScatter:
         # test list with linewidths
         ax2.scatter([1,2,3], [4,5,6], c='red',edgecolors='green',
                     marker=['s', 'o'], linewidths=[10,5],s=500)
+        
+        # test mixes list
+        ax3.scatter([1, 2, 3, 4, 5], [4, 5, 6, 7, 8],
+                    marker=['o', mmarkers.MarkerStyle('o', fillstyle='top'),
+                            '*', mmarkers.MarkerStyle('s', fillstyle='bottom'),
+                            's'])
 
     @image_comparison(baseline_images=['marker_list_of_one'], remove_text=True,
                       extensions=['png'])
@@ -2147,7 +2153,7 @@ class TestScatter:
         fig, ax = plt.subplots()
         with pytest.raises(ValueError) as e:
             ax.scatter([1, 2, 3], [4, 5, 6], marker=[])
-        assert str(e.value) == 'marker cannot be an empty list.'
+        assert str(e.value) == 'marker cannot be an empty list'
 
     # Parameters for *test_scatter_c*. NB: assuming that the
     # scatter plot will have 4 elements. The tuple scheme is:
