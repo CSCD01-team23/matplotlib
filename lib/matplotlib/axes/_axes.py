@@ -4310,6 +4310,25 @@ class Axes(_AxesBase):
         return c, colors, edgecolors
 
     def _return_path(self, edgecolors, linewidths, marker):
+        """
+        Helper method for feature #11155
+        Returns a list of Path objects, edgecolors and
+        linewidths for PathCollection.
+
+        Parameters
+        ----------
+        edgecolors : {'face', 'none', *None*} or color or sequence of color
+
+        linewidths : scalar or array-like, default: :rc:`lines.linewidth`
+            The linewidth of the marker edges.
+
+        marker:`~.markers.MarkerStyle`, default: :rc:`scatter.marker`
+            The marker style. *marker* can either be a single value
+            or a list of values. Each value must either be an instance of the
+            MarkerStyle class or the text shorthand for a particular marker.
+            See :mod:`matplotlib.markers` for more information about marker
+            styles.
+        """
         if marker is None:
             marker = [rcParams['scatter.marker']]
         elif isinstance(marker, np.ndarray):
@@ -4327,9 +4346,34 @@ class Axes(_AxesBase):
 
         return paths, edgecolors, linewidths
 
-
     @staticmethod
     def _create_path(edgecolors, linewidths, marker):
+        """
+        Helper method for feature #11155
+        Creates a Path object for each marker in the input list.
+        Returns the list of Path objects, edgecolors, and linewidths.
+
+        Parameters
+        ----------
+
+        edgecolors : {'face', 'none', *None*} or color or sequence of color
+            If a single marker is given edgecolors is assigned
+            the value 'face'.
+            edgecolors is only modified if a single marker is given.
+
+        linewidths : scalar or array-like, default: :rc:`lines.linewidth`
+            The linewidth of the marker edges.
+            If a single marker is given linewidth is assigned
+            the default value in rcParams['lines.linewidth].
+            linewidths is only modified if a single marker is given.
+
+        marker:`~.markers.MarkerStyle`, default: :rc:`scatter.marker`
+            The marker style. *marker* can either be a single value
+            or a list of values. Each value must either be an instance of the
+            MarkerStyle class or the text shorthand for a particular marker.
+            See :mod:`matplotlib.markers` for more information about marker
+            styles.
+        """
         single_marker = (len(marker) == 1)
         paths = []
         for m in marker:
@@ -4395,6 +4439,9 @@ class Axes(_AxesBase):
             or the text shorthand for a particular marker.
             See :mod:`matplotlib.markers` for more information about marker
             styles.
+            Feature #11155 allows marker to be a list of markers.
+            Each element in the list can be either an instance of the class
+            or the text shorthand for a particular marker.
 
         cmap : str or `~matplotlib.colors.Colormap`, default: :rc:`image.cmap`
             A `.Colormap` instance or registered colormap name. *cmap* is only
@@ -4419,8 +4466,13 @@ class Axes(_AxesBase):
             The linewidth of the marker edges. Note: The default *edgecolors*
             is 'face'. You may want to change this as well.
 
+            Feature #11155:
+            If the number of markers is more than one, the value specified in
+            linewidths will be applied for non-filled markers instead of the
+            default value in rcParams
+
         edgecolors : {'face', 'none', *None*} or color or sequence of color, \
-default: :rc:`scatter.edgecolors`
+            default: :rc:`scatter.edgecolors`
             The edge color of the marker. Possible values:
 
             - 'face': The edge color will always be the same as the face color.
@@ -4429,6 +4481,10 @@ default: :rc:`scatter.edgecolors`
 
             For non-filled markers, the *edgecolors* kwarg is ignored and
             forced to 'face' internally.
+
+            Feature #11155:
+            If the number of markers is more than one, the value specified in
+            edgecolors overwrites the fill color of non-filled markers.
 
         plotnonfinite : bool, default: False
             Set to plot points with nonfinite *c*, in conjunction with
@@ -4465,7 +4521,7 @@ default: :rc:`scatter.edgecolors`
         # check marker is not empty list
         if isinstance(marker, list) and (len(marker) == 0):
             raise ValueError("marker cannot be an empty list")        
-        
+
         # Process **kwargs to handle aliases, conflicts with explicit kwargs:
 
         self._process_unit_info(xdata=x, ydata=y, kwargs=kwargs)
