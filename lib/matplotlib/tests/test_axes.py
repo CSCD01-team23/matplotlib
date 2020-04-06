@@ -2113,7 +2113,7 @@ class TestScatter:
         # test list of shorter length
         ax1.scatter([1, 2, 3], [4, 5, 6], marker=['*', 's'])
         
-        # test list with linewidths
+        # test list with linewidths and edgecolours
         ax2.scatter([1, 2, 3, 4], [4, 5, 6, 7], c='red',
                     edgecolors=['green', 'blue', 'red', 'lime'],
                     marker=['s', 'o', '1', '*'], linewidths=[10, 5, 1 , 20],
