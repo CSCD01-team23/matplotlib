@@ -2125,8 +2125,10 @@ class TestScatter:
         ax1.scatter([1, 2, 3], [4, 5, 6], marker=['*', 's'])
         
         # test list with linewidths
-        ax2.scatter([1,2,3], [4,5,6], c='red',edgecolors='green',
-                    marker=['s', 'o'], linewidths=[10,5],s=500)
+        ax2.scatter([1, 2, 3, 4], [4, 5, 6, 7], c='red',
+                    edgecolors=['green', 'blue', 'red', 'lime'],
+                    marker=['s', 'o', '1', '*'], linewidths=[10, 5, 1 , 20],
+                    s=200)
         
         # test mixes list
         ax3.scatter([1, 2, 3, 4, 5], [4, 5, 6, 7, 8],
