@@ -2110,6 +2110,64 @@ class TestScatter:
         ax = fig_ref.subplots()
         ax.scatter(x.reshape(5, 2), x, c=x.reshape(2, 5))
 
+    @image_comparison(baseline_images=['marker_list'], remove_text=True,
+                      extensions=['png'])
+    def test_marker_list(self):
+        # to minimize the number of image comparison tests
+        # we test several aspects of the marker list functionality
+        # in one test
+        fig, ((ax0, ax1), (ax2, ax3)) = plt.subplots(nrows=2, ncols=2)
+
+        # test list of length x.size
+        ax0.scatter([1, 2, 3], [4, 5, 6], marker=['o', '*', 's'])
+
+        # test list of shorter length
+        ax1.scatter([1, 2, 3], [4, 5, 6], marker=['*', 's'])
+
+        # test list with linewidths and edgecolours
+        ax2.scatter([1, 2, 3, 4], [4, 5, 6, 7], c='red',
+                    edgecolors=['green', 'blue', 'red', 'lime'],
+                    marker=['s', 'o', '1', '*'], linewidths=[10, 5, 1, 20],
+                    s=200)
+
+        # test mixes list
+        ax3.scatter([1, 2, 3, 4, 5], [4, 5, 6, 7, 8],
+                    marker=['o', mmarkers.MarkerStyle('o', fillstyle='top'),
+                            '*', mmarkers.MarkerStyle('s', fillstyle='bottom'),
+                            's'])
+
+    @image_comparison(baseline_images=['marker_list_of_one'], remove_text=True,
+                      extensions=['png'])
+    def test_marker_list_of_one(self):
+        fig, (ax0, ax1) = plt.subplots(ncols=2)
+        ax0.scatter([3, 4, 2, 6], [2, 5, 2, 3],
+                        c=[(1, 0, 0), 'y', 'b', 'lime'],
+                        s=[60, 50, 40, 30],
+                        edgecolors=['k', 'r', 'g', 'b'],
+                        marker=['s'])
+        ax1.scatter([3, 4, 2, 6], [2, 5, 2, 3],
+                    c=[(1, 0, 0), 'y', 'b', 'lime'],
+                    s=[60, 50, 40, 30],
+                    edgecolors=['k', 'r', 'g', 'b'],
+                    marker=[mmarkers.MarkerStyle('o', fillstyle='top')])
+
+    @image_comparison(baseline_images=['marker_nparray_list'],
+                      remove_text=True, extensions=['png'])
+    def test_marker_nparray_list(self):
+        np.random.seed(19680801)
+        N = 40
+        x, y, c = np.random.rand(3, N)
+        s = np.random.randint(10, 220, size=N)
+        m = np.repeat(["o", "s", "D", "*"], N/4)
+        fig, ax = plt.subplots()
+        ax.scatter(x, y, c=c, marker=m, s=s)
+
+    def test_marker_empty_list(self):
+        fig, ax = plt.subplots()
+        with pytest.raises(ValueError) as e:
+            ax.scatter([1, 2, 3], [4, 5, 6], marker=[])
+        assert str(e.value) == 'marker cannot be an empty list'
+
     # Parameters for *test_scatter_c*. NB: assuming that the
     # scatter plot will have 4 elements. The tuple scheme is:
     # (*c* parameter case, exception regexp key or None if no exception)

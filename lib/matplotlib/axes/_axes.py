@@ -1161,7 +1161,6 @@ class Axes(_AxesBase):
         masked_verts[:, 0, 1] = y
         masked_verts[:, 1, 0] = xmax
         masked_verts[:, 1, 1] = y
-
         lines = mcoll.LineCollection(masked_verts, colors=colors,
                                      linestyles=linestyles, label=label)
         self.add_collection(lines, autolim=False)
@@ -4310,6 +4309,86 @@ class Axes(_AxesBase):
             colors = None  # use cmap, norm after collection is created
         return c, colors, edgecolors
 
+    def _return_path(self, edgecolors, linewidths, marker):
+        """
+        Returns a list of Path objects, edgecolors and
+        linewidths for PathCollection.
+
+        Parameters
+        ----------
+        edgecolors : {'face', 'none', *None*} or color or sequence of color
+
+        linewidths : scalar or array-like, default: :rc:`lines.linewidth`
+            The linewidth of the marker edges.
+
+        marker:`~.markers.MarkerStyle`, default: :rc:`scatter.marker`
+            The marker style. *marker* can either be a single value
+            or a list of values. Each value must either be an instance of the
+            MarkerStyle class or the text shorthand for a particular marker.
+            See :mod:`matplotlib.markers` for more information about marker
+            styles.
+        """
+        if marker is None:
+            marker = [rcParams['scatter.marker']]
+        elif isinstance(marker, np.ndarray):
+            try:
+                paths, edgecolors, linewidths = \
+                    self._create_path(edgecolors, linewidths, marker)
+            except (ValueError, TypeError):
+                pass
+            else:
+                return paths, edgecolors, linewidths
+        if not isinstance(marker, list):
+            marker = [marker]
+        paths, edgecolors, linewidths = \
+            self._create_path(edgecolors, linewidths, marker)
+
+        return paths, edgecolors, linewidths
+
+    @staticmethod
+    def _create_path(edgecolors, linewidths, marker):
+        """
+        Creates a Path object for each marker in the input list.
+        Returns the list of Path objects, edgecolors, and linewidths.
+
+        Parameters
+        ----------
+
+        edgecolors : {'face', 'none', *None*} or color or sequence of color
+            If a single marker is given edgecolors is assigned
+            the value 'face'.
+            edgecolors is only modified if a single marker is given.
+
+        linewidths : scalar or array-like, default: :rc:`lines.linewidth`
+            The linewidth of the marker edges.
+            If a single marker is given linewidth is assigned
+            the default value in rcParams['lines.linewidth].
+            linewidths is only modified if a single marker is given.
+
+        marker:`~.markers.MarkerStyle`, default: :rc:`scatter.marker`
+            The marker style. *marker* can either be a single value
+            or a list of values. Each value must either be an instance of the
+            MarkerStyle class or the text shorthand for a particular marker.
+            See :mod:`matplotlib.markers` for more information about marker
+            styles.
+        """
+        single_marker = (len(marker) == 1)
+        paths = []
+        for m in marker:
+            if isinstance(m, mmarkers.MarkerStyle):
+                marker_obj = m
+            else:
+                marker_obj = mmarkers.MarkerStyle(m)
+            path = marker_obj.get_path().transformed(
+                marker_obj.get_transform())
+            if single_marker:
+                if not marker_obj.is_filled():
+                    edgecolors = 'face'
+                    linewidths = rcParams['lines.linewidth']
+            paths.append(path)
+
+        return paths, edgecolors, linewidths
+
     @_preprocess_data(replace_names=["x", "y", "s", "linewidths",
                                      "edgecolors", "c", "facecolor",
                                      "facecolors", "color"],
@@ -4320,7 +4399,8 @@ class Axes(_AxesBase):
                 verts=None, edgecolors=None, *, plotnonfinite=False,
                 **kwargs):
         """
-        A scatter plot of *y* vs. *x* with varying marker size and/or color.
+        A scatter plot of *y* vs. *x* with varying marker size, shape
+        and/or color.
 
         Parameters
         ----------
@@ -4355,7 +4435,19 @@ class Axes(_AxesBase):
 
         marker : `~.markers.MarkerStyle`, default: :rc:`scatter.marker`
             The marker style. *marker* can be either an instance of the class
-            or the text shorthand for a particular marker.
+            or the text shorthand for a particular marker, or a list of
+            instances and/or text shorthands. The list can be of any length
+            and if there are more markers on the graph than marker styles in
+            the list the marker styles will be cycled in the order that they
+            are provided so that each marker uses a specified marker style.
+            When using a list of marker styles note that the edgecolors and
+            linewidths of each marker must be specified - including both
+            filled and unfilled markers. The only exception is when no
+            edgecolors or linewidths are specified and the defaults are used
+            for all markers. When specifying edgecolors and linewidths be
+            aware that when the list length is shorter than the total number
+            of markers on the graph the edgecolors and linewidths will be
+            cycled just as the marker styles are.
             See :mod:`matplotlib.markers` for more information about marker
             styles.
 
@@ -4381,9 +4473,12 @@ class Axes(_AxesBase):
         linewidths : scalar or array-like, default: :rc:`lines.linewidth`
             The linewidth of the marker edges. Note: The default *edgecolors*
             is 'face'. You may want to change this as well.
+            If the number of markers is more than one, the value specified in
+            linewidths will be applied for non-filled markers instead of the
+            default value in rcParams
 
         edgecolors : {'face', 'none', *None*} or color or sequence of color, \
-default: :rc:`scatter.edgecolors`
+            default: :rc:`scatter.edgecolors`
             The edge color of the marker. Possible values:
 
             - 'face': The edge color will always be the same as the face color.
@@ -4391,7 +4486,9 @@ default: :rc:`scatter.edgecolors`
             - A color or sequence of colors.
 
             For non-filled markers, the *edgecolors* kwarg is ignored and
-            forced to 'face' internally.
+            forced to 'face' internally. Unless the number of markers is more
+            than one, then value specified in edgecolors overwrites the fill
+            color of non-filled markers.
 
         plotnonfinite : bool, default: False
             Set to plot points with nonfinite *c*, in conjunction with
@@ -4413,7 +4510,7 @@ default: :rc:`scatter.edgecolors`
         Notes
         -----
         * The `.plot` function will be faster for scatterplots where markers
-          don't vary in size or color.
+          don't vary in size, shape or color.
 
         * Any or all of *x*, *y*, *s*, and *c* may be masked arrays, in which
           case all masks will be combined and only unmasked points will be
@@ -4425,6 +4522,10 @@ default: :rc:`scatter.edgecolors`
           size matches the size of *x* and *y*.
 
         """
+        # check marker is not empty list
+        if isinstance(marker, list) and (len(marker) == 0):
+            raise ValueError("marker cannot be an empty list")
+
         # Process **kwargs to handle aliases, conflicts with explicit kwargs:
 
         self._process_unit_info(xdata=x, ydata=y, kwargs=kwargs)
@@ -4461,25 +4562,13 @@ default: :rc:`scatter.edgecolors`
 
         scales = s   # Renamed for readability below.
 
-        # load default marker from rcParams
-        if marker is None:
-            marker = rcParams['scatter.marker']
-
-        if isinstance(marker, mmarkers.MarkerStyle):
-            marker_obj = marker
-        else:
-            marker_obj = mmarkers.MarkerStyle(marker)
-
-        path = marker_obj.get_path().transformed(
-            marker_obj.get_transform())
-        if not marker_obj.is_filled():
-            edgecolors = 'face'
-            linewidths = rcParams['lines.linewidth']
+        paths, edgecolors, linewidths = \
+             self._return_path(edgecolors, linewidths, marker)
 
         offsets = np.ma.column_stack([x, y])
 
         collection = mcoll.PathCollection(
-                (path,), scales,
+                paths, scales,
                 facecolors=colors,
                 edgecolors=edgecolors,
                 linewidths=linewidths,
@@ -5275,7 +5364,6 @@ default: :rc:`scatter.edgecolors`
 
             if ind_dir == "y":
                 pts = pts[:, ::-1]
-
             polys.append(pts)
 
         collection = mcoll.PolyCollection(polys, **kwargs)
