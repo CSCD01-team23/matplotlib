@@ -4444,13 +4444,13 @@ class Axes(_AxesBase):
             linewidths of each marker must be specified - including both
             filled and unfilled markers. The only exception is when no
             edgecolors or linewidths are specified and the defaults are used
-            for all markers. When specifying edgecolors and linewidths be 
+            for all markers. When specifying edgecolors and linewidths be
             aware that when the list length is shorter than the total number
-            of markers on the graph the edgecolors and linewidths will be cycled
-            just as the marker styles are.
+            of markers on the graph the edgecolors and linewidths will be
+            cycled just as the marker styles are.
             See :mod:`matplotlib.markers` for more information about marker
             styles.
-            
+
         cmap : str or `~matplotlib.colors.Colormap`, default: :rc:`image.cmap`
             A `.Colormap` instance or registered colormap name. *cmap* is only
             used if *c* is an array of floats.
@@ -4524,7 +4524,7 @@ class Axes(_AxesBase):
         """
         # check marker is not empty list
         if isinstance(marker, list) and (len(marker) == 0):
-            raise ValueError("marker cannot be an empty list")        
+            raise ValueError("marker cannot be an empty list")
 
         # Process **kwargs to handle aliases, conflicts with explicit kwargs:
 
