@@ -4311,7 +4311,6 @@ class Axes(_AxesBase):
 
     def _return_path(self, edgecolors, linewidths, marker):
         """
-        Helper method for feature #11155
         Returns a list of Path objects, edgecolors and
         linewidths for PathCollection.
 
@@ -4349,7 +4348,6 @@ class Axes(_AxesBase):
     @staticmethod
     def _create_path(edgecolors, linewidths, marker):
         """
-        Helper method for feature #11155
         Creates a Path object for each marker in the input list.
         Returns the list of Path objects, edgecolors, and linewidths.
 
@@ -4401,7 +4399,8 @@ class Axes(_AxesBase):
                 verts=None, edgecolors=None, *, plotnonfinite=False,
                 **kwargs):
         """
-        A scatter plot of *y* vs. *x* with varying marker size and/or color.
+        A scatter plot of *y* vs. *x* with varying marker size, shape
+        and/or color.
 
         Parameters
         ----------
@@ -4436,13 +4435,22 @@ class Axes(_AxesBase):
 
         marker : `~.markers.MarkerStyle`, default: :rc:`scatter.marker`
             The marker style. *marker* can be either an instance of the class
-            or the text shorthand for a particular marker.
+            or the text shorthand for a particular marker, or a list of
+            instances and/or text shorthands. The list can be of any length
+            and if there are more markers on the graph than marker styles in
+            the list the marker styles will be cycled in the order that they
+            are provided so that each marker uses a specified marker style.
+            When using a list of marker styles note that the edgecolors and
+            linewidths of each marker must be specified - including both
+            filled and unfilled markers. The only exception is when no
+            edgecolors or linewidths are specified and the defaults are used
+            for all markers. When specifying edgecolors and linewidths be 
+            aware that when the list length is shorter than the total number
+            of markers on the graph the edgecolors and linewidths will be cycled
+            just as the marker styles are.
             See :mod:`matplotlib.markers` for more information about marker
             styles.
-            Feature #11155 allows marker to be a list of markers.
-            Each element in the list can be either an instance of the class
-            or the text shorthand for a particular marker.
-
+            
         cmap : str or `~matplotlib.colors.Colormap`, default: :rc:`image.cmap`
             A `.Colormap` instance or registered colormap name. *cmap* is only
             used if *c* is an array of floats.
@@ -4465,8 +4473,6 @@ class Axes(_AxesBase):
         linewidths : scalar or array-like, default: :rc:`lines.linewidth`
             The linewidth of the marker edges. Note: The default *edgecolors*
             is 'face'. You may want to change this as well.
-
-            Feature #11155:
             If the number of markers is more than one, the value specified in
             linewidths will be applied for non-filled markers instead of the
             default value in rcParams
@@ -4480,11 +4486,9 @@ class Axes(_AxesBase):
             - A color or sequence of colors.
 
             For non-filled markers, the *edgecolors* kwarg is ignored and
-            forced to 'face' internally.
-
-            Feature #11155:
-            If the number of markers is more than one, the value specified in
-            edgecolors overwrites the fill color of non-filled markers.
+            forced to 'face' internally. Unless the number of markers is more
+            than one, then value specified in edgecolors overwrites the fill
+            color of non-filled markers.
 
         plotnonfinite : bool, default: False
             Set to plot points with nonfinite *c*, in conjunction with
@@ -4506,7 +4510,7 @@ class Axes(_AxesBase):
         Notes
         -----
         * The `.plot` function will be faster for scatterplots where markers
-          don't vary in size or color.
+          don't vary in size, shape or color.
 
         * Any or all of *x*, *y*, *s*, and *c* may be masked arrays, in which
           case all masks will be combined and only unmasked points will be
